@@ -29,11 +29,12 @@ def _sync_student_files() -> None:
 
 TRAINING_CONFIG = {
     "team_name": "team01",
-    "output_tag": "pursuit_v2",
+    "output_tag": "pursuit_v3",
     "algorithm": "sac",
-    "iterations": 50,
+    "iterations": 200,
     "reward_module": "student.my_reward",
     "observation_module": "",
+    "init_bundle": "artifacts/models/team01/pursuit_v2",
 }
 
 
@@ -127,6 +128,11 @@ def build_command(args: argparse.Namespace) -> list[str]:
         "student minimal reward template",
         "--experiment-yaml",
         args.experiment_yaml,
+        *(
+            ["--init-bundle", TRAINING_CONFIG["init_bundle"]]
+            if TRAINING_CONFIG.get("init_bundle")
+            else []
+        ),
     ]
 
 
