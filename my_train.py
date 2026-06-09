@@ -29,12 +29,12 @@ def _sync_student_files() -> None:
 
 TRAINING_CONFIG = {
     "team_name": "team01",
-    "output_tag": "pursuit_v3",
+    "output_tag": "pursuit_v4",
     "algorithm": "sac",
     "iterations": 200,
     "reward_module": "student.my_reward",
     "observation_module": "",
-    "init_bundle": "artifacts/models/team01/pursuit_v2",
+    "init_bundle": "artifacts/models/team01/pursuit_v3",
 }
 
 
@@ -133,6 +133,9 @@ def build_command(args: argparse.Namespace) -> list[str]:
             if TRAINING_CONFIG.get("init_bundle")
             else []
         ),
+        "--checkpoint-frequency", "50",
+        "--save-native-checkpoint",
+        "--target-entropy", "-1.0",
     ]
 
 
