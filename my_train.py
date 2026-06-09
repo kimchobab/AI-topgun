@@ -29,7 +29,7 @@ def _sync_student_files() -> None:
 
 TRAINING_CONFIG = {
     "team_name": "team01",
-    "output_tag": "pursuit_v1",
+    "output_tag": "pursuit_v2",
     "algorithm": "sac",
     "iterations": 50,
     "reward_module": "student.my_reward",

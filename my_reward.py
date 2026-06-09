@@ -24,11 +24,17 @@ from dogfight.sim.state_schema import StateIndex
 
 MY_REWARD_CONFIG = {
     "step_penalty": -0.01,
+    # P1: WEZ 실제 반각 1°에 집중하도록 30°→10°로 좁힘 (29° 갭 로컬 최적 함정 해소)
     "pursuit_scale": 0.5,
-    "pursuit_half_angle_deg": 30.0,
-    "pursuit_range_m": 3000.0,
+    "pursuit_half_angle_deg": 10.0,
+    # P1: WEZ 유효 거리 914m에 맞게 3000m→1500m으로 좁힘
+    "pursuit_range_m": 1500.0,
+    # P1: in_wez(obs[14]=+1) 매 스텝 직접 보상 — 체류 유도
+    "in_wez_bonus": 3.0,
     "damage_scale": 20.0,
-    "low_altitude_penalty": 0.1,
+    # P1: 추락 패널티 10배 강화, 기준고도 1000m (종료선 300m의 3배 버퍼)
+    "low_altitude_m": 1000.0,
+    "low_altitude_penalty": 1.0,
     "win_reward": 100.0,
     "loss_reward": -100.0,
     "draw_reward": -10.0,
@@ -67,9 +73,18 @@ def compute_reward(
 
     components["damage"] = float(reward_config.get("damage_scale", 20.0)) * (target_damage - ownship_damage)
 
+    # P1: WEZ 체류 직접 보상 — in_wez는 obs[14]가 아닌 target_damage > 0으로 판단
+    components["in_wez"] = (
+        float(reward_config.get("in_wez_bonus", 3.0))
+        if target_damage > 0.0
+        else 0.0
+    )
+
+    # P1: 고도 패널티 — 기준고도(low_altitude_m) 이하 시 강한 패널티
     r_safety = 0.0
-    if float(ownship_state[StateIndex.ALT]) < 600.0:
-        r_safety = -float(reward_config.get("low_altitude_penalty", 0.1))
+    alt_threshold = float(reward_config.get("low_altitude_m", 1000.0))
+    if float(ownship_state[StateIndex.ALT]) < alt_threshold:
+        r_safety = -float(reward_config.get("low_altitude_penalty", 1.0))
     components["safety"] = r_safety
 
     terminal_reward = 0.0
